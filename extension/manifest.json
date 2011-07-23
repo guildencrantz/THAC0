@@ -1,13 +1,17 @@
 {
-   "version" : "0.1",
+   "version" : "0.2",
+   "content_scripts" : [
+      {
+         "run_at" : "document_idle",
+         "matches" : [
+            "http://plus.google.com/*",
+            "https://plus.google.com/*"
+         ],
+         "js" : [
+            "thac0.js"
+         ]
+      }
+   ],
    "name" : "THAC0",
-   "description" : "Armor for your Google+ Streams.",
-   "content_scripts" : [{
-       "run_at" : "document_idle",
-	   "matches" : [
-          "http://plus.google.com/*",
-          "https://plus.google.com/*"
-	   ],
-	   "js" : [ "thac0.js" ]
-   }]
+   "description" : "Armor for your Google+ Streams."
 }

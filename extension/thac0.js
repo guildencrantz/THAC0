@@ -1,6 +1,7 @@
 var UPDATE_CLASS = '.a-b-f-i.a-f-i';
 var PLUSSES_CLASS = '.a-b-f-i-sb-nd.a-f-i-sb-nd.d-s-r.a-b-f-i-ha-pe';
 var PROFILE_LINK_CLASS = '.cs2K7c.a-f-i-Zb.a-f-i-Zb-U';
+var STREAM_NAME = '.a-b-f-U-R';
 
 var RELATIONSHIPS = [];
 var THAC0 = [];
@@ -114,21 +115,25 @@ function hideUpdate(profile, plusses) {
 }
 
 function filterStream() {
-	RELATIONSHIPS = getRelationships();
-	// TODO: Can I add a key to a value?
-	THAC0 = getThac0(RELATIONSHIPS[1]);
+	var stream = document.querySelector(STREAM_NAME).innerText;
+	// If we're looking at the stream for a filter circle, don't filter it.
+	if (!stream.match(/\+\d+/)) {
+		RELATIONSHIPS = getRelationships();
+		// TODO: Can I add a key to a value?
+		THAC0 = getThac0(RELATIONSHIPS[1]);
 
-	var updates = document.querySelectorAll(UPDATE_CLASS);
-	for (var i = 0; i < updates.length; i++) {
-		var profile = updates[i].querySelector(PROFILE_LINK_CLASS);
-		var plusses = updates[i].querySelector(PLUSSES_CLASS);
-		if (plusses != null) {
-			plusses = plusses.innerText.substr(1);
-		} else {
-			plusses = 0;
-		}
-		if (hideUpdate(profile, plusses)) {
-			updates[i].style.display = 'none';
+		var updates = document.querySelectorAll(UPDATE_CLASS);
+		for (var i = 0; i < updates.length; i++) {
+			var profile = updates[i].querySelector(PROFILE_LINK_CLASS);
+			var plusses = updates[i].querySelector(PLUSSES_CLASS);
+			if (plusses != null) {
+				plusses = plusses.innerText.substr(1);
+			} else {
+				plusses = 0;
+			}
+			if (hideUpdate(profile, plusses)) {
+				updates[i].style.display = 'none';
+			}
 		}
 	}
 }

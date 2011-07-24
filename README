@@ -1,3 +1,10 @@
 Somebody in your google+ stream too noisy? Still want to follow them, but only want to see things they've posted which have at least +1, or +5, or +100? This is the chrome extension for you.
 
-Once you've installed the extension simply create new circles called "+1", "+5", or what ever number you want (no punctuation except the leading +). Now add the noisy people you want tamed to one of these circles and all updates that the people in those circles make will be hidden until they reach the number of plusses for the circle they are in. Note: If somebody is placed in multiple circles, such as both "+1" and "+5" the value of the larger circle, +5 in this case, is used. This means that you'll only see posts from this person once they've reached at least +5.
+Currently if you create a "+1" circle and add somebody to it the extension will hide all updates from that person which haven't been +1ed at least once. Likewise a +2 circle will only show you updates which have been +1ed by two people. You can use any threshold you like, just don't put any punctuation in the circle name (+1000, not +1,000 or +1.000). Simple. 
+
+If you actually want to check in on people who you're filtering you can always go to their profile: the feed on that page won't be filtered. If you want to check in on everybody in a filtered circle you can go to the steam for that circle and the extension is smart enough not to filter it for you.
+
+NOTE: If you place somebody in multiple filter circles only the most restrictive circle will be used (meaning if Bob is in both the +1 and +5 circles you'll only see his posts which have at least +5).
+
+WARNING: This extension doesn't reorder updates. If an update is hidden at position #19 in your stream when it finally gets enough votes it'll simply become visible in position #19 rather than being moved up to position #1.
+

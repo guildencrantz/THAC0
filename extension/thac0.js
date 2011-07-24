@@ -3,11 +3,12 @@ var PLUSSES_CLASS = '.a-b-f-i-sb-nd.a-f-i-sb-nd.d-s-r.a-b-f-i-ha-pe';
 var PROFILE_LINK_CLASS = '.cs2K7c.a-f-i-Zb.a-f-i-Zb-U';
 var STREAM_NAME = '.a-b-f-U-R';
 
-var RELATIONSHIPS = [];
+var SOCIAL_GRAPH = [];
 var THAC0 = [];
 
 function googleToJson(responseText) {
-	// This function is based on the PHP CleanGoogleJSON function in https://github.com/jmstriegel/php.googleplusapi/blob/master/lib/GooglePlus/GoogleUtil.php
+	// This function is based on the PHP CleanGoogleJSON function in 
+	// https://github.com/jmstriegel/php.googleplusapi/blob/master/lib/GooglePlus/GoogleUtil.php
 
 	// the response starts with ")]}'\n\n", so we need to strip that out to get a valid json structure.
 	responseText = responseText.substring(6);
@@ -67,7 +68,7 @@ function googleToJson(responseText) {
 	return JSON.parse(json);
 }
 
-function getRelationships() {
+function getSocialGraph() {
 	xmlHttp = new XMLHttpRequest();
 	xmlHttp.open('GET', '/_/socialgraph/lookup/circles/?ct=2&m=1', false);
 	xmlHttp.send(null);
@@ -88,26 +89,35 @@ function getThac0(circles) {
 
 function getProfileCircles(profile) {
 	var oid = profile.getAttribute('oid');
-	for (var i = 0; i < RELATIONSHIPS[2].length; i++) {
-		if (oid == RELATIONSHIPS[2][i][0][2]) {
+	// For some reason when simply calling SOCIAL_GRAPH[2].length frequently it'd return
+	// some very strange results (in dev tools SOCIAL_GRAPH[2] would show it contained 60
+	// items, however SOCIAL_GRAPH[2].length would return 2. By adding the circledContacts
+	// variable everything appears to be returning correctly consistently.
+	var circledContacts = SOCIAL_GRAPH[2];
+	for (var i = 0; i < circledContacts.length; i++) {
+		if (oid == circledContacts[i][0][2]) {
 			var circles = [];
-			for (var j = 0; j < RELATIONSHIPS[2][i][3].length; j++) {
-				circles.push(RELATIONSHIPS[2][i][3][j][2][0]);
+			for (var j = 0; j < circledContacts[i][3].length; j++) {
+				circles.push(circledContacts[i][3][j][2][0]);
 			}
 			return circles;
 		}
 	}
+	// When your posts show in your stream you'll fall out here.
 	return null;
 }
 
 function hideUpdate(profile, plusses) {
 	var plusMinimum = 0;
 	var circles = getProfileCircles(profile);
-	for(var i = 0; i < circles.length; i++) {
-		var thac0Circle = THAC0[circles[i]];
-		if(thac0Circle != undefined) {
-			if (plusMinimum < thac0Circle) {
-				plusMinimum = thac0Circle;
+	// Circles will be null for your updates.
+	if (circles != null) {
+		for(var i = 0; i < circles.length; i++) {
+			var thac0Circle = THAC0[circles[i]];
+			if(thac0Circle != undefined) {
+				if (plusMinimum < thac0Circle) {
+					plusMinimum = thac0Circle;
+				}
 			}
 		}
 	}
@@ -118,9 +128,9 @@ function filterStream() {
 	var stream = document.querySelector(STREAM_NAME).innerText;
 	// If we're looking at the stream for a filter circle, don't filter it.
 	if (!stream.match(/\+\d+/)) {
-		RELATIONSHIPS = getRelationships();
+		SOCIAL_GRAPH = getSocialGraph();
 		// TODO: Can I add a key to a value?
-		THAC0 = getThac0(RELATIONSHIPS[1]);
+		THAC0 = getThac0(SOCIAL_GRAPH[1]);
 
 		var updates = document.querySelectorAll(UPDATE_CLASS);
 		for (var i = 0; i < updates.length; i++) {

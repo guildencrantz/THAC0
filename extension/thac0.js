@@ -3,8 +3,9 @@ var PLUSSES_CLASS = '.a-b-f-i-sb-nd.a-f-i-sb-nd.d-s-r.a-b-f-i-ha-pe';
 var PROFILE_LINK_CLASS = '.cs2K7c.a-f-i-Zb.a-f-i-Zb-U';
 var STREAM_NAME = '.a-b-f-U-R';
 
-var SOCIAL_GRAPH = [];
 var THAC0 = [];
+var CIRCLED_CONTACTS = [];
+var ARMOR_CACHE = [];
 
 function googleToJson(responseText) {
 	// This function is based on the PHP CleanGoogleJSON function in 
@@ -68,11 +69,13 @@ function googleToJson(responseText) {
 	return JSON.parse(json);
 }
 
-function getSocialGraph() {
+function loadSocialGraph() {
 	xmlHttp = new XMLHttpRequest();
 	xmlHttp.open('GET', '/_/socialgraph/lookup/circles/?ct=2&m=1', false);
 	xmlHttp.send(null);
-	return googleToJson(xmlHttp.responseText);
+	var socialGraph = googleToJson(xmlHttp.responseText);
+	THAC0 = getThac0(socialGraph[1]);
+	CIRCLED_CONTACTS = socialGraph[2];
 }
 
 function getThac0(circles) {
@@ -89,25 +92,23 @@ function getThac0(circles) {
 
 function getProfileCircles(profile) {
 	var oid = profile.getAttribute('oid');
-	// For some reason when simply calling SOCIAL_GRAPH[2].length frequently it'd return
-	// some very strange results (in dev tools SOCIAL_GRAPH[2] would show it contained 60
-	// items, however SOCIAL_GRAPH[2].length would return 2. By adding the circledContacts
-	// variable everything appears to be returning correctly consistently.
-	var circledContacts = SOCIAL_GRAPH[2];
-	for (var i = 0; i < circledContacts.length; i++) {
-		if (oid == circledContacts[i][0][2]) {
+	for (var i = 0; i < CIRCLED_CONTACTS.length; i++) {
+		if (oid == CIRCLED_CONTACTS[i][0][2]) {
 			var circles = [];
-			for (var j = 0; j < circledContacts[i][3].length; j++) {
-				circles.push(circledContacts[i][3][j][2][0]);
+			for (var j = 0; j < CIRCLED_CONTACTS[i][3].length; j++) {
+				circles.push(CIRCLED_CONTACTS[i][3][j][2][0]);
 			}
 			return circles;
 		}
 	}
 	// When your posts show in your stream you'll fall out here.
+	// TODO: There needs to be a check somewhere to see if the
+	// update is from the user or not, if it's not then we need to
+	// redownload the socialgraph and update everything.
 	return null;
 }
 
-function hideUpdate(profile, plusses) {
+function cacheArmorModifier(profile) {
 	var plusMinimum = 0;
 	var circles = getProfileCircles(profile);
 	// Circles will be null for your updates.
@@ -121,16 +122,24 @@ function hideUpdate(profile, plusses) {
 			}
 		}
 	}
-	return (plusMinimum != 0) && (plusses < plusMinimum);
+	ARMOR_CACHE[profile] = plusMinimum;
+}
+
+function hideUpdate(profile, plusses) {
+	if (ARMOR_CACHE[profile] == undefined) {
+		cacheArmorModifier(profile);
+	} 
+
+	return (ARMOR_CACHE[profile] != 0) && (plusses < ARMOR_CACHE[profile]);
 }
 
 function filterStream() {
 	var stream = document.querySelector(STREAM_NAME).innerText;
 	// If we're looking at the stream for a filter circle, don't filter it.
 	if (!stream.match(/\+\d+/)) {
-		SOCIAL_GRAPH = getSocialGraph();
-		// TODO: Can I add a key to a value?
-		THAC0 = getThac0(SOCIAL_GRAPH[1]);
+		if (CIRCLED_CONTACTS.length == 0) {
+			loadSocialGraph();
+		}
 
 		var updates = document.querySelectorAll(UPDATE_CLASS);
 		for (var i = 0; i < updates.length; i++) {
@@ -143,6 +152,10 @@ function filterStream() {
 			}
 			if (hideUpdate(profile, plusses)) {
 				updates[i].style.display = 'none';
+			} else {
+				// TODO: Need to add a class to updates I've hidden, then
+				// only redisplay those updates here.
+				updates[i].style.display = 'inline';
 			}
 		}
 	}
@@ -150,6 +163,7 @@ function filterStream() {
 
 (function(){
 	filterStream();
+	// TODO: Tighten up the trigger.
 	document.body.addEventListener(
 		'DOMNodeInserted', function(e) {
 			setTimeout(function() {

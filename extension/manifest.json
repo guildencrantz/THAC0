@@ -1,6 +1,5 @@
 {
-   "version" : "0.2.1",
-   "name" : "THAC0",
+   "version" : "0.2.2",
    "content_scripts" : [
       {
          "run_at" : "document_idle",
@@ -13,5 +12,6 @@
          ]
       }
    ],
+   "name" : "THAC0",
    "description" : "Armor for your Google+ Streams."
 }
